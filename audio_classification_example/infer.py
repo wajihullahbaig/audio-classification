@@ -6,19 +6,21 @@ Created on Mon Oct  7 22:28:53 2024
 """
 
 import torch
-from train import NN, download_mnist_datasets
+from train import CNNNetwork
+from urbansound_dataset import UrbanSoundDataset
+import torchaudio
 
 class_mapping = [
-        "0",
-        "1",
-        "2",
-        "3",
-        "4",
-        "5",
-        "6",
-        "7",
-        "8",
-        "9",        
+        "air_conditioner",
+        "car_horn",
+        "children_playing",
+        "dog_bark",
+        "drilling",
+        "engine_idling",
+        "gun_shot",
+        "jackhammer",
+        "siren",
+        "street_music"        
         
     ]
 
@@ -34,18 +36,39 @@ def predict(model,input,target,class_mapping):
     
 
 if __name__ == "__main__":
+    
+    if torch.cuda.is_available():
+        device = 'cuda'
+    else:
+        device = 'cpu'        
+    print(f"Using device: {device}")    
+    
     # load the model
-    model = NN()
-    state_dict = torch.load("model/nn.pth")
+    model = CNNNetwork()
+    state_dict = torch.load("model/cnn.pth")
     model.load_state_dict(state_dict)
 
-    # load the dataset
+    annotations_file = "C:/Users/Acer/Downloads/UrbanSound8K/UrbanSound8K/metadata/UrbanSound8K.csv"
+    audio_dir  = "C:/Users/Acer/Downloads/UrbanSound8K/UrbanSound8K/audio"
+    sampling_rate = 22050
+    num_samples = 22050
+        
+    mel_spectrogram_transform = torchaudio.transforms.MelSpectrogram(
+        sample_rate = sampling_rate, 
+        n_fft = 1024,
+        hop_length = 512,
+        n_mels = 64
+        )
     
-    _, validation_dataset = download_mnist_datasets()
+    # load the datset
+    usd = UrbanSoundDataset(annotations_file,audio_dir,mel_spectrogram_transform,sampling_rate,num_samples,device)
+    
     
     # get a sample from validation for inference
     
-    input,target = validation_dataset[0][0],validation_dataset[0][1]
+    input,target = usd[0][0],usd[0][1] # [channels,features,time]
+    # CNN needs 4 dimensions, so we unsqueeze
+    input.unsqueeze_(1) # [batch_size,channels,features,time]
 
     #make an inference
     

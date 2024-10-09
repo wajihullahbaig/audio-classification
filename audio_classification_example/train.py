@@ -10,7 +10,9 @@ from torch import nn
 from torch.utils.data import DataLoader
 from torchvision import datasets,transforms
 from torchvision.transforms import ToTensor
-
+import torchaudio
+from cnn import CNNNetwork
+from urbansound_dataset import UrbanSoundDataset
 
 
 BATCH_SIZE = 128
@@ -18,25 +20,6 @@ EPOCHS = 10
 LEARNING_RATE = 0.001
 
 
-class NN(nn.Module):
-
-    def __init__(self):
-        super().__init__()
-        self.flatten = nn.Flatten()
-        self.dense_layers = nn.Sequential(
-            # Squish the input
-            nn.Linear(28 * 28, 256),
-            nn.ReLU(),
-            # Squish till we get number of classes
-            nn.Linear(256, 10)
-        )
-        self.softmax = nn.Softmax(dim=1)
-
-    def forward(self, input_data):
-        x = self.flatten(input_data)
-        logits = self.dense_layers(x)
-        predictions = self.softmax(logits)
-        return predictions
 
 
 def download_mnist_datasets():
@@ -90,18 +73,35 @@ def train(model, data_loader, loss_fn, optimiser, device, epochs):
 
 
 if __name__ == "__main__":
-
-    # download data and create data loader
-    train_data, _ = download_mnist_datasets()
-    train_dataloader = create_data_loader(train_data, BATCH_SIZE)
-
-    # construct model and assign it to device
+    
+    annotations_file = "C:/Users/Acer/Downloads/UrbanSound8K/UrbanSound8K/metadata/UrbanSound8K.csv"
+    audio_dir  = "C:/Users/Acer/Downloads/UrbanSound8K/UrbanSound8K/audio"
+    sampling_rate = 22050
+    num_samples = 22050
+    
     if torch.cuda.is_available():
-        device = "cuda"
+        device = 'cuda'
     else:
-        device = "cpu"
-    print(f"Using {device}")
-    model = NN().to(device)
+        device = 'cpu'        
+    print(f"Using device: {device}")    
+    
+    # instantiate out dataset and and create data loader
+
+   
+    mel_spectrogram_transform = torchaudio.transforms.MelSpectrogram(
+        sample_rate = sampling_rate, 
+        n_fft = 1024,
+        hop_length = 512,
+        n_mels = 64
+        )
+    usd = UrbanSoundDataset(annotations_file,audio_dir,mel_spectrogram_transform,sampling_rate,num_samples,device)
+    
+    print(len(usd))
+    
+    train_dataloader = create_data_loader(usd, BATCH_SIZE)
+
+   
+    model = CNNNetwork().to(device)
     print(model)
 
     # initialise loss funtion + optimiser
@@ -113,5 +113,5 @@ if __name__ == "__main__":
     train(model, train_dataloader, loss_fn, optimiser, device, EPOCHS)
 
     # save model
-    torch.save(model.state_dict(), "model/nn.pth")
-    print("Trained feed forward net saved at model/nn.pth")
+    torch.save(model.state_dict(), "model/cnn.pth")
+    print("Trained net saved at model/cnn.pth")
