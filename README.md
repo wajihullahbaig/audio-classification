@@ -5,5 +5,7 @@ torchaudio and associated libraries to build a DNN for audio classification
 
 We tackle the problem as vision problem rather than working in 1D waveform. We create mel spectrograms from the audio and perform the classification of audios
 
-Using the Urban8K dataset for classification. ![Link](https://urbansounddataset.weebly.com/urbansound8k.html) 
+Using the Urban8K dataset for classification. 
+[Link](https://urbansounddataset.weebly.com/urbansound8k.html) 
+
 
