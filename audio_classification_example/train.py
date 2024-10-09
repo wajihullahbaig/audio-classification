@@ -16,7 +16,7 @@ from urbansound_dataset import UrbanSoundDataset
 
 
 BATCH_SIZE = 128
-EPOCHS = 10
+EPOCHS = 20
 LEARNING_RATE = 0.001
 
 
