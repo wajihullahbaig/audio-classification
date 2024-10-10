@@ -9,6 +9,7 @@ import torch
 from train import CNNNetwork
 from urbansound_dataset import UrbanSoundDataset
 import torchaudio
+import os
 
 class_mapping = [
         "air_conditioner",
@@ -45,7 +46,8 @@ if __name__ == "__main__":
     
     # load the model
     model = CNNNetwork()
-    state_dict = torch.load("model/cnn.pth")
+    model_path = os.path.join(os.getcwd(),"audio_classification_example","model","cnn.pth")
+    state_dict = torch.load(model_path)
     model.load_state_dict(state_dict)
 
     annotations_file = "C:/Users/Acer/Downloads/UrbanSound8K/UrbanSound8K/metadata/UrbanSound8K.csv"
