@@ -13,11 +13,11 @@ from torchvision.transforms import ToTensor
 import torchaudio
 from cnn import CNNNetwork
 from urbansound_dataset import UrbanSoundDataset
+import os
 
-
-BATCH_SIZE = 128
-EPOCHS = 20
-LEARNING_RATE = 0.001
+BATCH_SIZE = 32
+EPOCHS = 50
+LEARNING_RATE = 0.005
 
 
 
@@ -62,20 +62,29 @@ def train_single_epoch(model, data_loader, loss_fn, optimiser, device):
         optimiser.step() # update the weights
 
     print(f"loss: {loss.item()}")
+    
+    return loss.item()
 
 
-def train(model, data_loader, loss_fn, optimiser, device, epochs):
+def train(model, data_loader, loss_fn, optimiser, device, epochs,model_path):
+    prev_loss = 0.0
     for i in range(epochs):
         print(f"Epoch {i+1}")
-        train_single_epoch(model, data_loader, loss_fn, optimiser, device)
+        loss = train_single_epoch(model, data_loader, loss_fn, optimiser, device)
         print("---------------------------")
-    print("Finished training")
+        if  prev_loss > loss or prev_loss == 0.0:
+            # save model which has a better loss than the previous one
+            prev_loss = loss
+            
+            torch.save(model.state_dict(), model_path)
+            print(f"Trained net saved at {model_path}")    
 
 
 if __name__ == "__main__":
     
     annotations_file = "C:/Users/Acer/Downloads/UrbanSound8K/UrbanSound8K/metadata/UrbanSound8K.csv"
     audio_dir  = "C:/Users/Acer/Downloads/UrbanSound8K/UrbanSound8K/audio"
+    model_path = os.path.join(os.getcwd(),"audio_classification_example","model","cnn.pth")
     sampling_rate = 22050
     num_samples = 22050
     
@@ -110,8 +119,7 @@ if __name__ == "__main__":
                                  lr=LEARNING_RATE)
 
     # train model
-    train(model, train_dataloader, loss_fn, optimiser, device, EPOCHS)
+    train(model, train_dataloader, loss_fn, optimiser, device, EPOCHS,model_path)
+    print("Finished training")
 
-    # save model
-    torch.save(model.state_dict(), "model/cnn.pth")
-    print("Trained net saved at model/cnn.pth")
+

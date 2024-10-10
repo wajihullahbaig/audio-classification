@@ -68,6 +68,9 @@ class CNNNetwork(nn.Module) :
         self.linear = nn.Linear(in_features = 128 * 5 * 4, out_features = 10)
         self.softmax = nn.Softmax(dim=1)
         
+        # Initialize weights
+        self.apply(self._init_weights)
+        
     def forward(self,input_data):
         
         x = self.conv1(input_data)
@@ -79,7 +82,13 @@ class CNNNetwork(nn.Module) :
         prediction = self.softmax(logits)
         
         return prediction
-    
+ 
+    def _init_weights(self, m):
+        # Lets initialize the CNN 
+        if isinstance(m, nn.Linear):
+            nn.init.normal_(m.weight, mean=0.0, std=0.01)
+            if m.bias is not None:
+                nn.init.constant_(m.bias, 0)   
 
 if __name__ == "__main__":
 
