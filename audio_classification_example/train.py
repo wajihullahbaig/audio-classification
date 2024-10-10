@@ -15,9 +15,9 @@ from cnn import CNNNetwork
 from urbansound_dataset import UrbanSoundDataset
 import os
 
-BATCH_SIZE = 32
+BATCH_SIZE = 256
 EPOCHS = 50
-LEARNING_RATE = 0.005
+LEARNING_RATE = 0.001
 
 
 
