@@ -9,3 +9,5 @@ Using the Urban8K dataset for classification.
 [Link](https://urbansounddataset.weebly.com/urbansound8k.html) 
 
 
+Excellent resource for leanring audio signal processing can be found here
+[Link](https://www.youtube.com/@ValerioVelardoTheSoundofAI) 
