@@ -9,6 +9,20 @@ import torch
 from torch import nn
 
 
+class Softpick(nn.Module):
+    def __init__(self, dim=-1, eps=1e-6):
+        super().__init__()
+        self.dim = dim
+        self.eps = eps
+    
+    def forward(self, x):
+        mmax = torch.max(x, dim=self.dim, keepdim=True)
+        m = mmax.values
+        num = torch.exp(x-m) - torch.exp(-m)
+        numer = torch.relu(num)
+        d = torch.abs(num)
+        denom = torch.sum(d, dim=self.dim, keepdim=True) + self.eps
+        return numer/denom
 
 class CNNNetwork(nn.Module) :
     
@@ -66,7 +80,8 @@ class CNNNetwork(nn.Module) :
             )
         self.flatten = nn.Flatten()
         self.linear = nn.Linear(in_features = 128 * 5 * 4, out_features = 10)
-        self.softmax = nn.Softmax(dim=1)
+        #self.soft_func = Softpick(dim=1)
+        self.soft_func = nn.Softmax(dim=1)
         
         # Initialize weights
         self.apply(self._init_weights)
@@ -79,7 +94,7 @@ class CNNNetwork(nn.Module) :
         x = self.conv4(x)
         x = self.flatten(x)
         logits = self.linear(x)
-        prediction = self.softmax(logits)
+        prediction = self.soft_func(logits)
         
         return prediction
  
